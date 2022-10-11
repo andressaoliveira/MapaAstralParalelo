@@ -2,9 +2,9 @@ package com.lacoste.io.runners;
 
 import com.lacoste.io.model.Pessoa;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class MapaAstralParalelo {
     private MapaAstralParalelo() {
@@ -15,11 +15,16 @@ public class MapaAstralParalelo {
         Path grupoTxtPath = Paths.get(RESOURCES_PATH, "grupo.txt");
         var pessoas = FileIO.lerArquivoPessoas(grupoTxtPath);
 
-        List<Thread> threads = null;
 
-        for (Pessoa pessoa: pessoas) {
-            var mapa = new FileIO(pessoa);
-            new Thread(mapa, pessoa.getNome()).start();
-        }
+        pessoas.stream().parallel().forEach(pessoa ->
+                {
+                    try {
+                        FileIO.gerarRelatorioUnico(pessoa);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+
     }
 }

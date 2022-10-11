@@ -67,6 +67,7 @@ public class FileIO implements Runnable {
     }
 
     public static void gerarRelatorioUnico(Pessoa pessoa) throws IOException {
+        System.out.println("Time: " + System.nanoTime() + " -> Criando mapa de: " + pessoa.getNome());
         Path filePath = Paths.get(RESOURCES_PATH, pessoa.getNome() + ".txt");
 
         List<String> results = getResultsPessoa(pessoa);
