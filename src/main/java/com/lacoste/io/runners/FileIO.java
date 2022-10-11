@@ -12,20 +12,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FileIO {
+public class FileIO implements Runnable {
 
-    private FileIO() {
+    private final Pessoa pessoa;
+
+    public FileIO(Pessoa pessoa) {
+        this.pessoa = pessoa;
     }
 
     private static final String PROJECT_PATH = System.getProperty("user.dir");
     private static final String RESOURCES_PATH = PROJECT_PATH.concat("/src").concat("/main").concat("/resources");
 
-    public static void run() throws IOException {
-        Path grupoTxtPath = Paths.get(RESOURCES_PATH, "grupo.txt");
-
-        atualizarBancoPessoas(grupoTxtPath); // precisa preencher o DB para a classe Stream funcionar
-
-        gerarRelatorios();
+    public void run() {
+        try {
+            System.out.println("Time: " + System.nanoTime() + " -> Criando mapa de: " + Thread.currentThread().getName());
+            gerarRelatorioUnico(pessoa);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void atualizarBancoPessoas(Path arquivo) {
@@ -33,7 +37,7 @@ public class FileIO {
         PessoaDatabase.saveAll(lerArquivoPessoas(arquivo));
     }
 
-    private static List<Pessoa> lerArquivoPessoas(Path arquivo) {
+    public static List<Pessoa> lerArquivoPessoas(Path arquivo) {
         try {
             List<String> lines = Files.readAllLines(arquivo);
 
@@ -60,6 +64,18 @@ public class FileIO {
             Files.createFile(filePath);
             Files.write(filePath, results);
         }
+    }
+
+    public static void gerarRelatorioUnico(Pessoa pessoa) throws IOException {
+        Path filePath = Paths.get(RESOURCES_PATH, pessoa.getNome() + ".txt");
+
+        List<String> results = getResultsPessoa(pessoa);
+
+        if (Files.exists(filePath))
+            Files.delete(filePath);
+
+        Files.createFile(filePath);
+        Files.write(filePath, results);
     }
 
     private static List<String> getResultsPessoa(Pessoa pessoa) {
